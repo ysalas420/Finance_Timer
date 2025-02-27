@@ -131,12 +131,7 @@
             let tableBody = document.querySelector("#dealsTable tbody");
             tableBody.innerHTML = "";
             
-            let fromDate = document.getElementById("fromDate").value;
-            let toDate = document.getElementById("toDate").value;
-            
-            storedDeals.filter(deal => {
-                return (!fromDate || deal.date >= fromDate) && (!toDate || deal.date <= toDate);
-            }).forEach((deal, index) => {
+            storedDeals.forEach((deal, index) => {
                 let row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -147,7 +142,7 @@
                     <td>${deal.deskManager}</td>
                     <td>${deal.vehicle}</td>
                     <td>${deal.stock}</td>
-                    <td><input type="text" class="finance-manager-input" placeholder="Enter Finance Manager" onblur="saveFinanceManager(this, ${index})"></td>
+                    <td>${deal.financeManager ? deal.financeManager : `<input type="text" class="finance-manager-input" placeholder="Enter Finance Manager" onblur="saveFinanceManager(this, ${index})">`}</td>
                     <td>${deal.dropOffTime}</td>
                     <td>${deal.pickupTime}</td>
                     <td>${deal.elapsedTime}</td>
@@ -164,6 +159,18 @@
 
         function saveFinanceManager(input, index) {
             storedDeals[index].financeManager = input.value.trim();
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
+        }
+
+        function markAsPickedUp(index) {
+            storedDeals[index].pickupTime = new Date().toLocaleTimeString();
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
+        }
+
+        function markAsFinished(index) {
+            storedDeals[index].finishedTime = new Date().toLocaleTimeString();
             localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
             renderTable();
         }
