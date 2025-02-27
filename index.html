@@ -74,8 +74,8 @@
     </table>
 
     <script>
-        let dealCount = 0;
         let storedDeals = JSON.parse(localStorage.getItem("financeDeals")) || [];
+        let today = new Date().toISOString().split('T')[0];
 
         function dropDeal() {
             let salesperson = document.getElementById("salesperson").value.trim();
@@ -90,11 +90,10 @@
                 return;
             }
 
-            dealCount++;
             let dropOffTime = new Date().toLocaleTimeString();
 
             let deal = {
-                id: dealCount,
+                id: storedDeals.length + 1,
                 salesperson,
                 salesperson2,
                 closer,
@@ -104,7 +103,8 @@
                 financeManager: "",
                 dropOffTime,
                 pickupTime: "--",
-                elapsedTime: "--"
+                elapsedTime: "--",
+                date: today
             };
 
             storedDeals.push(deal);
@@ -118,7 +118,7 @@
             let tableBody = document.querySelector("#dealsTable tbody");
             tableBody.innerHTML = "";
 
-            storedDeals.forEach((deal, index) => {
+            storedDeals.filter(deal => deal.date === today).forEach((deal, index) => {
                 let row = document.createElement("tr");
 
                 row.innerHTML = `
@@ -150,7 +150,6 @@
             storedDeals[index].elapsedTime = elapsedTime;
 
             localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
-
             renderTable();
         }
 
@@ -164,7 +163,11 @@
             return `${hours}h ${minutes}m ${seconds}s`;
         }
 
-        window.onload = renderTable;
+        window.onload = () => {
+            storedDeals = storedDeals.filter(deal => deal.date === today);
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
+        };
     </script>
 </body>
 </html>
