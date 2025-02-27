@@ -50,6 +50,7 @@
         <input type="text" id="stock" placeholder="Stock Number" required>
         <input type="text" id="deskManager" placeholder="Desk Manager" required>
         <button class="btn" onclick="dropDeal()">🚗 Drop Deal</button>
+        <button class="btn" onclick="resetDeals()" style="background-color: red; color: white;">🔄 Reset All Deals</button>
     </div>
 
     <table id="dealsTable">
@@ -65,7 +66,9 @@
                 <th>Finance Manager</th>
                 <th>Drop-Off Time</th>
                 <th>Pickup Time</th>
-                <th>Elapsed Time</th>
+                <th>Elapsed Time (Drop to Pickup)</th>
+                <th>Finished Time</th>
+                <th>Elapsed Time (Pickup to Finished)</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -104,6 +107,8 @@
                 dropOffTime,
                 pickupTime: "--",
                 elapsedTime: "--",
+                finishedTime: "--",
+                elapsedFinishedTime: "--",
                 date: today
             };
 
@@ -133,7 +138,12 @@
                     <td class="dropoff-time">${deal.dropOffTime}</td>
                     <td class="pickup-time">${deal.pickupTime}</td>
                     <td class="elapsed-time">${deal.elapsedTime}</td>
-                    <td><button class="btn pickup-btn" onclick="markAsPickedUp(this, ${index})">✅ Picked Up</button></td>
+                    <td class="finished-time">${deal.finishedTime}</td>
+                    <td class="elapsed-finished-time">${deal.elapsedFinishedTime}</td>
+                    <td>
+                        <button class="btn pickup-btn" onclick="markAsPickedUp(this, ${index})">✅ Picked Up</button>
+                        <button class="btn finish-btn" onclick="markAsFinished(this, ${index})">🏁 Finished</button>
+                    </td>
                 `;
 
                 tableBody.appendChild(row);
@@ -142,17 +152,18 @@
 
         function markAsPickedUp(button, index) {
             let row = button.closest("tr");
-            let financeManagerInput = row.querySelector(".finance-manager-input");
             let pickupTime = new Date().toLocaleTimeString();
-            let dropOffTime = row.querySelector(".dropoff-time").innerText;
-            let elapsedTime = calculateElapsedTime(dropOffTime, pickupTime);
-
-            if (financeManagerInput) {
-                storedDeals[index].financeManager = financeManagerInput.value.trim();
-            }
             storedDeals[index].pickupTime = pickupTime;
-            storedDeals[index].elapsedTime = elapsedTime;
+            storedDeals[index].elapsedTime = calculateElapsedTime(storedDeals[index].dropOffTime, pickupTime);
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
+        }
 
+        function markAsFinished(button, index) {
+            let row = button.closest("tr");
+            let finishedTime = new Date().toLocaleTimeString();
+            storedDeals[index].finishedTime = finishedTime;
+            storedDeals[index].elapsedFinishedTime = calculateElapsedTime(storedDeals[index].pickupTime, finishedTime);
             localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
             renderTable();
         }
@@ -161,15 +172,12 @@
             let startTime = new Date("01/01/2000 " + start);
             let endTime = new Date("01/01/2000 " + end);
             let diff = (endTime - startTime) / 1000;
-            let hours = Math.floor(diff / 3600);
-            let minutes = Math.floor((diff % 3600) / 60);
+            let minutes = Math.floor(diff / 60);
             let seconds = diff % 60;
-            return `${hours}h ${minutes}m ${seconds}s`;
+            return `${minutes}m ${seconds}s`;
         }
 
         window.onload = () => {
-            storedDeals = storedDeals.filter(deal => deal.date === today);
-            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
             renderTable();
         };
     </script>
