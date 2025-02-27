@@ -50,11 +50,7 @@
         <input type="text" id="deskManager" placeholder="Desk Manager" required>
         <input type="text" id="vehicle" placeholder="Vehicle" required>
         <input type="text" id="stock" placeholder="Stock Number" required>
-        <input type="date" id="fromDate"> 
-        <input type="date" id="toDate"> 
-        <button class="btn" onclick="filterDeals()">📅 Filter</button>
         <button class="btn" onclick="dropDeal()">🚗 Drop Deal</button>
-        <button class="btn" onclick="resetDeals()" style="background-color: red; color: white;">🔄 Reset All Deals</button>
     </div>
 
     <table id="dealsTable">
@@ -80,6 +76,13 @@
         <tbody>
         </tbody>
     </table>
+
+    <div class="input-container" style="margin-top: 20px;">
+        <input type="date" id="fromDate"> 
+        <input type="date" id="toDate"> 
+        <button class="btn" onclick="filterDeals()">📅 Filter</button>
+        <button class="btn" onclick="resetDeals()" style="background-color: red; color: white;">🔄 Reset All Deals</button>
+    </div>
 
     <script>
         let storedDeals = JSON.parse(localStorage.getItem("financeDeals")) || [];
@@ -144,7 +147,7 @@
                     <td>${deal.deskManager}</td>
                     <td>${deal.vehicle}</td>
                     <td>${deal.stock}</td>
-                    <td>${deal.financeManager}</td>
+                    <td><input type="text" class="finance-manager-input" placeholder="Enter Finance Manager" onblur="saveFinanceManager(this, ${index})"></td>
                     <td>${deal.dropOffTime}</td>
                     <td>${deal.pickupTime}</td>
                     <td>${deal.elapsedTime}</td>
@@ -157,6 +160,12 @@
                 `;
                 tableBody.appendChild(row);
             });
+        }
+
+        function saveFinanceManager(input, index) {
+            storedDeals[index].financeManager = input.value.trim();
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
         }
 
         function filterDeals() {
