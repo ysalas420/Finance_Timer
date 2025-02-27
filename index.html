@@ -129,7 +129,7 @@
                     <td>${deal.customer}</td>
                     <td>${deal.stock}</td>
                     <td>${deal.deskManager}</td>
-                    <td><input type="text" class="finance-manager" placeholder="Enter Finance Manager" value="${deal.financeManager}"></td>
+                    <td class="finance-manager">${deal.financeManager ? deal.financeManager : '<input type="text" class="finance-manager-input" placeholder="Enter Finance Manager">'}</td>
                     <td class="dropoff-time">${deal.dropOffTime}</td>
                     <td class="pickup-time">${deal.pickupTime}</td>
                     <td class="elapsed-time">${deal.elapsedTime}</td>
@@ -142,12 +142,14 @@
 
         function markAsPickedUp(button, index) {
             let row = button.closest("tr");
-            let financeManagerInput = row.querySelector(".finance-manager");
+            let financeManagerInput = row.querySelector(".finance-manager-input");
             let pickupTime = new Date().toLocaleTimeString();
             let dropOffTime = row.querySelector(".dropoff-time").innerText;
             let elapsedTime = calculateElapsedTime(dropOffTime, pickupTime);
 
-            storedDeals[index].financeManager = financeManagerInput.value.trim();
+            if (financeManagerInput) {
+                storedDeals[index].financeManager = financeManagerInput.value.trim();
+            }
             storedDeals[index].pickupTime = pickupTime;
             storedDeals[index].elapsedTime = elapsedTime;
 
