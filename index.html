@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Timer Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: yellow;
+        }
+        .btn {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .input-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .input-container input {
+            padding: 5px;
+            width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Finance Timer Board</h2>
+
+    <div class="input-container">
+        <input type="text" id="salesperson" placeholder="Salesperson 1" required>
+        <input type="text" id="salesperson2" placeholder="Salesperson 2 (Optional)">
+        <input type="text" id="closer" placeholder="Closer" required>
+        <input type="text" id="customer" placeholder="Customer Name" required>
+        <input type="text" id="stock" placeholder="Stock Number" required>
+        <input type="text" id="deskManager" placeholder="Desk Manager" required>
+        <button class="btn" onclick="dropDeal()">🚗 Drop Deal</button>
+    </div>
+
+    <table id="dealsTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Salesperson 1</th>
+                <th>Salesperson 2</th>
+                <th>Closer</th>
+                <th>Customer Name</th>
+                <th>Stock #</th>
+                <th>Desk Manager</th>
+                <th>Finance Manager</th>
+                <th>Drop-Off Time</th>
+                <th>Pickup Time</th>
+                <th>Elapsed Time</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        let dealCount = 0;
+        let storedDeals = JSON.parse(localStorage.getItem("financeDeals")) || [];
+
+        function dropDeal() {
+            let salesperson = document.getElementById("salesperson").value.trim();
+            let salesperson2 = document.getElementById("salesperson2").value.trim() || "N/A";
+            let closer = document.getElementById("closer").value.trim();
+            let customer = document.getElementById("customer").value.trim();
+            let stock = document.getElementById("stock").value.trim();
+            let deskManager = document.getElementById("deskManager").value.trim();
+
+            if (!salesperson || !closer || !customer || !stock || !deskManager) {
+                alert("⚠️ Please fill in all required fields!");
+                return;
+            }
+
+            dealCount++;
+            let dropOffTime = new Date().toLocaleTimeString();
+
+            let deal = {
+                id: dealCount,
+                salesperson,
+                salesperson2,
+                closer,
+                customer,
+                stock,
+                deskManager,
+                financeManager: "",
+                dropOffTime,
+                pickupTime: "--",
+                elapsedTime: "--"
+            };
+
+            storedDeals.push(deal);
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+
+            renderTable();
+            document.querySelectorAll(".input-container input").forEach(input => input.value = "");
+        }
+
+        function renderTable() {
+            let tableBody = document.querySelector("#dealsTable tbody");
+            tableBody.innerHTML = "";
+
+            storedDeals.forEach((deal, index) => {
+                let row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${deal.salesperson}</td>
+                    <td>${deal.salesperson2}</td>
+                    <td>${deal.closer}</td>
+                    <td>${deal.customer}</td>
+                    <td>${deal.stock}</td>
+                    <td>${deal.deskManager}</td>
+                    <td><input type="text" class="finance-manager" placeholder="Enter Finance Manager"></td>
+                    <td class="dropoff-time">${deal.dropOffTime}</td>
+                    <td class="pickup-time">${deal.pickupTime}</td>
+                    <td class="elapsed-time">${deal.elapsedTime}</td>
+                    <td><button class="btn pickup-btn" onclick="markAsPickedUp(this, ${index})">✅ Picked Up</button></td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function markAsPickedUp(button, index) {
+            let row = button.closest("tr");
+            let pickupTime = new Date().toLocaleTimeString();
+            let dropOffTime = row.querySelector(".dropoff-time").innerText;
+            let elapsedTime = calculateElapsedTime(dropOffTime, pickupTime);
+
+            storedDeals[index].pickupTime = pickupTime;
+            storedDeals[index].elapsedTime = elapsedTime;
+
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+
+            renderTable();
+        }
+
+        function calculateElapsedTime(start, end) {
+            let startTime = new Date("01/01/2000 " + start);
+            let endTime = new Date("01/01/2000 " + end);
+            let diff = (endTime - startTime) / 1000;
+            let hours = Math.floor(diff / 3600);
+            let minutes = Math.floor((diff % 3600) / 60);
+            let seconds = diff % 60;
+            return `${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        window.onload = renderTable;
+    </script>
+</body>
+</html>
