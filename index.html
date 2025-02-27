@@ -43,12 +43,13 @@
     <h2>Finance Timer Board</h2>
 
     <div class="input-container">
+        <input type="text" id="customer" placeholder="Customer Name" required>
         <input type="text" id="salesperson" placeholder="Salesperson 1" required>
         <input type="text" id="salesperson2" placeholder="Salesperson 2 (Optional)">
         <input type="text" id="closer" placeholder="Closer" required>
-        <input type="text" id="customer" placeholder="Customer Name" required>
-        <input type="text" id="stock" placeholder="Stock Number" required>
         <input type="text" id="deskManager" placeholder="Desk Manager" required>
+        <input type="text" id="vehicle" placeholder="Vehicle" required>
+        <input type="text" id="stock" placeholder="Stock Number" required>
         <input type="date" id="fromDate"> 
         <input type="date" id="toDate"> 
         <button class="btn" onclick="filterDeals()">📅 Filter</button>
@@ -60,12 +61,13 @@
         <thead>
             <tr>
                 <th>#</th>
+                <th>Customer</th>
                 <th>Salesperson 1</th>
                 <th>Salesperson 2</th>
                 <th>Closer</th>
-                <th>Customer Name</th>
-                <th>Stock #</th>
                 <th>Desk Manager</th>
+                <th>Vehicle</th>
+                <th>Stock #</th>
                 <th>Finance Manager</th>
                 <th>Drop-Off Time</th>
                 <th>Pickup Time</th>
@@ -84,14 +86,15 @@
         let today = new Date().toISOString().split('T')[0];
 
         function dropDeal() {
+            let customer = document.getElementById("customer").value.trim();
             let salesperson = document.getElementById("salesperson").value.trim();
             let salesperson2 = document.getElementById("salesperson2").value.trim() || "N/A";
             let closer = document.getElementById("closer").value.trim();
-            let customer = document.getElementById("customer").value.trim();
-            let stock = document.getElementById("stock").value.trim();
             let deskManager = document.getElementById("deskManager").value.trim();
+            let vehicle = document.getElementById("vehicle").value.trim();
+            let stock = document.getElementById("stock").value.trim();
 
-            if (!salesperson || !closer || !customer || !stock || !deskManager) {
+            if (!customer || !salesperson || !closer || !deskManager || !vehicle || !stock) {
                 alert("⚠️ Please fill in all required fields!");
                 return;
             }
@@ -100,12 +103,13 @@
 
             let deal = {
                 id: storedDeals.length + 1,
+                customer,
                 salesperson,
                 salesperson2,
                 closer,
-                customer,
-                stock,
                 deskManager,
+                vehicle,
+                stock,
                 financeManager: "",
                 dropOffTime,
                 pickupTime: "--",
@@ -133,12 +137,13 @@
                 let row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${index + 1}</td>
+                    <td>${deal.customer}</td>
                     <td>${deal.salesperson}</td>
                     <td>${deal.salesperson2}</td>
                     <td>${deal.closer}</td>
-                    <td>${deal.customer}</td>
-                    <td>${deal.stock}</td>
                     <td>${deal.deskManager}</td>
+                    <td>${deal.vehicle}</td>
+                    <td>${deal.stock}</td>
                     <td>${deal.financeManager}</td>
                     <td>${deal.dropOffTime}</td>
                     <td>${deal.pickupTime}</td>
