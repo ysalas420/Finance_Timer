@@ -125,6 +125,7 @@
 
             storedDeals.filter(deal => deal.date === today).forEach((deal, index) => {
                 let row = document.createElement("tr");
+                let financeManagerCell = deal.financeManager ? deal.financeManager : `<input type="text" class="finance-manager-input" placeholder="Enter Finance Manager" onblur="saveFinanceManager(this, ${index})">`;
 
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -134,7 +135,7 @@
                     <td>${deal.customer}</td>
                     <td>${deal.stock}</td>
                     <td>${deal.deskManager}</td>
-                    <td class="finance-manager">${deal.financeManager ? deal.financeManager : '<input type="text" class="finance-manager-input" placeholder="Enter Finance Manager">'}</td>
+                    <td class="finance-manager">${financeManagerCell}</td>
                     <td class="dropoff-time">${deal.dropOffTime}</td>
                     <td class="pickup-time">${deal.pickupTime}</td>
                     <td class="elapsed-time">${deal.elapsedTime}</td>
@@ -145,9 +146,14 @@
                         <button class="btn finish-btn" onclick="markAsFinished(this, ${index})">🏁 Finished</button>
                     </td>
                 `;
-
                 tableBody.appendChild(row);
             });
+        }
+
+        function saveFinanceManager(input, index) {
+            storedDeals[index].financeManager = input.value.trim();
+            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+            renderTable();
         }
 
         function markAsPickedUp(button, index) {
