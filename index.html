@@ -49,6 +49,9 @@
         <input type="text" id="customer" placeholder="Customer Name" required>
         <input type="text" id="stock" placeholder="Stock Number" required>
         <input type="text" id="deskManager" placeholder="Desk Manager" required>
+        <input type="date" id="fromDate"> 
+        <input type="date" id="toDate"> 
+        <button class="btn" onclick="filterDeals()">📅 Filter</button>
         <button class="btn" onclick="dropDeal()">🚗 Drop Deal</button>
         <button class="btn" onclick="resetDeals()" style="background-color: red; color: white;">🔄 Reset All Deals</button>
     </div>
@@ -114,19 +117,20 @@
 
             storedDeals.push(deal);
             localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
-
             renderTable();
-            document.querySelectorAll(".input-container input").forEach(input => input.value = "");
         }
 
         function renderTable() {
             let tableBody = document.querySelector("#dealsTable tbody");
             tableBody.innerHTML = "";
-
-            storedDeals.filter(deal => deal.date === today).forEach((deal, index) => {
+            
+            let fromDate = document.getElementById("fromDate").value;
+            let toDate = document.getElementById("toDate").value;
+            
+            storedDeals.filter(deal => {
+                return (!fromDate || deal.date >= fromDate) && (!toDate || deal.date <= toDate);
+            }).forEach((deal, index) => {
                 let row = document.createElement("tr");
-                let financeManagerCell = deal.financeManager ? deal.financeManager : `<input type="text" class="finance-manager-input" placeholder="Enter Finance Manager" onblur="saveFinanceManager(this, ${index})">`;
-
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${deal.salesperson}</td>
@@ -135,52 +139,29 @@
                     <td>${deal.customer}</td>
                     <td>${deal.stock}</td>
                     <td>${deal.deskManager}</td>
-                    <td class="finance-manager">${financeManagerCell}</td>
-                    <td class="dropoff-time">${deal.dropOffTime}</td>
-                    <td class="pickup-time">${deal.pickupTime}</td>
-                    <td class="elapsed-time">${deal.elapsedTime}</td>
-                    <td class="finished-time">${deal.finishedTime}</td>
-                    <td class="elapsed-finished-time">${deal.elapsedFinishedTime}</td>
+                    <td>${deal.financeManager}</td>
+                    <td>${deal.dropOffTime}</td>
+                    <td>${deal.pickupTime}</td>
+                    <td>${deal.elapsedTime}</td>
+                    <td>${deal.finishedTime}</td>
+                    <td>${deal.elapsedFinishedTime}</td>
                     <td>
-                        <button class="btn pickup-btn" onclick="markAsPickedUp(this, ${index})">✅ Picked Up</button>
-                        <button class="btn finish-btn" onclick="markAsFinished(this, ${index})">🏁 Finished</button>
+                        <button class="btn" onclick="markAsPickedUp(${index})">✅ Picked Up</button>
+                        <button class="btn" onclick="markAsFinished(${index})">🏁 Finished</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        function saveFinanceManager(input, index) {
-            storedDeals[index].financeManager = input.value.trim();
-            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+        function filterDeals() {
             renderTable();
         }
 
-        function markAsPickedUp(button, index) {
-            let row = button.closest("tr");
-            let pickupTime = new Date().toLocaleTimeString();
-            storedDeals[index].pickupTime = pickupTime;
-            storedDeals[index].elapsedTime = calculateElapsedTime(storedDeals[index].dropOffTime, pickupTime);
-            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
+        function resetDeals() {
+            localStorage.removeItem("financeDeals");
+            storedDeals = [];
             renderTable();
-        }
-
-        function markAsFinished(button, index) {
-            let row = button.closest("tr");
-            let finishedTime = new Date().toLocaleTimeString();
-            storedDeals[index].finishedTime = finishedTime;
-            storedDeals[index].elapsedFinishedTime = calculateElapsedTime(storedDeals[index].pickupTime, finishedTime);
-            localStorage.setItem("financeDeals", JSON.stringify(storedDeals));
-            renderTable();
-        }
-
-        function calculateElapsedTime(start, end) {
-            let startTime = new Date("01/01/2000 " + start);
-            let endTime = new Date("01/01/2000 " + end);
-            let diff = (endTime - startTime) / 1000;
-            let minutes = Math.floor(diff / 60);
-            let seconds = diff % 60;
-            return `${minutes}m ${seconds}s`;
         }
 
         window.onload = () => {
